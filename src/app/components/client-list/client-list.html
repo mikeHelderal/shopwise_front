@@ -1,0 +1,74 @@
+<div class="container mt-4">
+  <div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+      <h2><i class="bi bi-people-fill"></i> Gestion des Clients</h2>
+      <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalClient">
+        <i class="bi bi-plus-lg"></i> Nouveau Client
+      </button>
+    </div>
+
+    <div class="modal fade" id="modalClient" tabindex="-1" aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header bg-primary text-white">
+            <h5 class="modal-title">Nouveau Client</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+          </div>
+          <div class="modal-body">
+            <form (ngSubmit)="ajouterClient()" #clientForm="ngForm">
+              <div class="mb-3">
+                <label class="form-label">Nom complet</label>
+                <input type="text" class="form-control" [(ngModel)]="nouveauClient.nom" name="nom" required>
+              </div>
+              <div class="mb-3">
+                <label class="form-label">Email</label>
+                <input type="email" class="form-control" [(ngModel)]="nouveauClient.email" name="email" required>
+              </div>
+              <div class="mb-3">
+                <label class="form-label">Téléphone</label>
+                <input type="text" class="form-control" [(ngModel)]="nouveauClient.telephone" name="telephone">
+              </div>
+              <div class="modal-footer px-0 pb-0">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                <button type="submit" class="btn btn-primary" [disabled]="!clientForm.form.valid" data-bs-dismiss="modal">Enregistrer</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <table class="table table-hover shadow-sm">
+    <thead class="table-dark">
+    <tr>
+      <th>Nom</th>
+      <th>Email</th>
+      <th>Téléphone</th>
+      <th>Points Fidélité</th>
+      <th>Actions</th>
+    </tr>
+    </thead>
+    <tbody>
+    @for( client of clients() ;track client.id){ <tr>
+      <td>{{ client.nom }}</td>
+      <td>{{ client.email }}</td>
+      <td>{{ client.telephone }}</td>
+      <td>
+        <span class="badge bg-success">{{ client.pointsFidelite }} pts</span>
+      </td>
+      <td>
+        <button class="btn btn-sm btn-outline-info me-2"><i class="bi bi-pencil"></i></button>
+        <button class="btn btn-sm btn-outline-danger"><i class="bi bi-trash"></i></button>
+      </td>
+    </tr>}
+
+    </tbody>
+  </table>
+  @if(clients().length === 0){
+    <div  class="alert alert-info">
+      Aucun client trouvé. Connectez votre base de données !
+    </div>
+  }
+
+</div>

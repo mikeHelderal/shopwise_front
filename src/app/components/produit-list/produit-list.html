@@ -1,0 +1,97 @@
+<div class="container mt-4">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h2><i class="bi bi-box-seam"></i> État des Stocks</h2>
+    <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#modalProduit">
+      <i class="bi bi-plus-lg"></i> Nouveau Produit
+    </button>
+  </div>
+
+  <div class="modal fade" id="modalProduit" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header bg-success text-white">
+          <h5 class="modal-title">Ajouter au Stock</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          <form (ngSubmit)="ajouterProduit()" #produitForm="ngForm">
+            <div class="mb-3">
+              <label class="form-label">Nom du produit</label>
+              <input type="text" class="form-control" [(ngModel)]="nouveauProduit.nom" name="nom" required>
+            </div>
+
+            <div class="row">
+              <div class="col-md-6 mb-3">
+                <label class="form-label">Prix (€)</label>
+                <input type="number" class="form-control" [(ngModel)]="nouveauProduit.prixUnitaire" name="prix" required>
+              </div>
+              <div class="col-md-6 mb-3">
+                <label class="form-label">Quantité</label>
+                <input type="number" class="form-control" [(ngModel)]="nouveauProduit.quantite" name="quantite" required>
+              </div>
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label">Catégorie</label>
+              <select class="form-select" [(ngModel)]="nouveauProduit.categorie" name="categorie" required>
+                <option [ngValue]="null" disabled>Choisir...</option>
+                @for (cat of categories(); track cat.id) {
+                  <option [ngValue]="cat">{{ cat.nom }}</option>
+                }
+              </select>
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label">Seuil d'alerte</label>
+              <input type="number" class="form-control" [(ngModel)]="nouveauProduit.seuilAlerte" name="seuil">
+              <small class="text-muted">Le stock passera en rouge sous ce chiffre.</small>
+            </div>
+
+            <div class="modal-footer px-0 pb-0">
+              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+              <button type="submit" class="btn btn-success" [disabled]="!produitForm.form.valid" data-bs-dismiss="modal">Enregistrer</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <table class="table table-hover shadow-sm mt-4">
+    <thead class="table-dark">
+    <tr>
+      <th>Référence</th>
+      <th>Nom du Produit</th>
+      <th>Prix Unitaire</th>
+      <th>Quantité</th>
+      <th>Catégorie</th>
+      <th>Actions</th>
+    </tr>
+    </thead>
+    <tbody>
+      @for (p of produits(); track p.id) {
+        <tr>
+          <td>#{{ p.id }}</td>
+          <td><strong>{{ p.nom }}</strong></td>
+          <td>{{ p.prixUnitaire }} €</td>
+          <td>
+            <span [class]="p.quantite <= p.seuilAlerte ? 'badge bg-danger' : 'badge bg-primary'">
+              {{ p.quantite }} en stock
+            </span>
+          </td>
+          <td>{{ p.categorie?.nom || 'Non classé' }}</td>
+          <td>
+            <button class="btn btn-sm btn-outline-secondary me-2"><i class="bi bi-arrow-repeat"></i></button>
+            <button class="btn btn-sm btn-outline-danger"><i class="bi bi-trash"></i></button>
+          </td>
+        </tr>
+      }
+    </tbody>
+  </table>
+
+  @if (produits().length === 0) {
+    <div class="alert alert-warning">
+      Aucun produit en stock. Commencez par en ajouter un !
+    </div>
+  }
+</div>
