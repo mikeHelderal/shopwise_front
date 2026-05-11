@@ -1,10 +1,21 @@
 import { TestBed } from '@angular/core/testing';
 import { App } from './app';
+import { provideRouter } from '@angular/router';
+import { DashboardService } from './services/dashboard/dashboard'; // Importe le service
+import { of } from 'rxjs';
+import { describe, it, expect, beforeEach, vi } from 'vitest';
 
 describe('App', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [App],
+      providers: [
+        provideRouter([]),
+        {
+          provide: DashboardService,
+          useValue: { getStats: vi.fn(() => of({ totalClients: 0, rdvDuJour: 0, produitsEnAlerte: 0 })) }
+        }
+      ]
     }).compileComponents();
   });
 
@@ -14,10 +25,10 @@ describe('App', () => {
     expect(app).toBeTruthy();
   });
 
-  it('should render title', async () => {
+  it(`should have the 'shopwise-front' title signal`, () => {
     const fixture = TestBed.createComponent(App);
-    await fixture.whenStable();
-    const compiled = fixture.nativeElement as HTMLElement;
-    expect(compiled.querySelector('h1')?.textContent).toContain('Hello, shopwise-front');
+    const app = fixture.componentInstance;
+
+    expect(app['title']()).toEqual('shopwise-front');
   });
 });

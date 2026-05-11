@@ -1,0 +1,47 @@
+<div class="container mt-4">
+  <h2 class="mb-4 fw-bold text-secondary">Tableau de bord ShopWise</h2>
+
+  <div class="row g-4">
+    <div class="col-md-4">
+      <div class="card border-0 shadow-sm p-3" style="border-left: 5px solid #0d6efd !important;">
+        <div class="d-flex align-items-center">
+          <div class="rounded-circle bg-primary bg-opacity-10 p-3 me-3">
+            <i class="bi bi-people text-primary fs-3"></i>
+          </div>
+          <div>
+            <h6 class="text-muted mb-0">Total Clients</h6>
+            <h3 class="fw-bold mb-0">{{ stats()?.totalClients || 0 }}</h3>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-4">
+      <div class="card border-0 shadow-sm p-3" style="border-left: 5px solid #198754 !important;">
+        <div class="d-flex align-items-center">
+          <div class="rounded-circle bg-success bg-opacity-10 p-3 me-3">
+            <i class="bi bi-calendar-check text-success fs-3"></i>
+          </div>
+          <div>
+            <h6 class="text-muted mb-0">RDV Aujourd'hui</h6>
+            <h3 class="fw-bold mb-0">{{ stats()?.rdvDuJour || 0 }}</h3>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-4">
+      <div class="card border-0 shadow-sm p-3" style="border-left: 5px solid #dc3545 !important;">
+        <div class="d-flex align-items-center">
+          <div class="rounded-circle bg-danger bg-opacity-10 p-3 me-3">
+            <i class="bi bi-exclamation-triangle text-danger fs-3"></i>
+          </div>
+          <div>
+            <h6 class="text-muted mb-0">Alertes Stock</h6>
+            <h3 class="fw-bold mb-0 text-danger">{{ stats()?.produitsEnAlerte || 0 }}</h3>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
