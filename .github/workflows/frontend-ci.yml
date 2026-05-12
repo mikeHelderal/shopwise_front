@@ -1,0 +1,36 @@
+name: Frontend CI
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1. Récupère le code
+      - uses: actions/checkout@v4
+
+      # 2. Installe Node.js (Version 20 recommandée en 2026)
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: 'npm'
+          # On cible le package-lock pour le cache
+          cache-dependency-path: package-lock.json
+
+      # 3. Installe les dépendances proprement
+      - name: Install dependencies
+        run: npm install
+
+      # 4. Lance les tests Vitest (en mode "run" unique)
+      - name: Run Tests
+        run: npm test -- --run
+
+      # 5. Vérifie que le projet compile pour la production
+      - name: Build Project
+        run: npm run build

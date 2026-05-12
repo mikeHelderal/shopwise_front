@@ -15,13 +15,20 @@ export class ProduitList {
   produits = signal<any[]>([]) // On stockera nos clients ici
   categories = signal<any[]>([]);
 
-  nouveauProduit = {
+  nouveauProduit: {
+    nom: string;
+    description: string;
+    prixUnitaire: number;
+    quantite: number;
+    seuilAlerte: number;
+    categorie: { id: number | null }
+  } = {
     nom: '',
     description: '',
     prixUnitaire: 0,
     quantite: 0,
     seuilAlerte: 5,
-    categorie: null // On stockera l'objet catégorie ici
+    categorie: {id: null}
   };
 
   constructor(private produitService: ProduitService,private categorieService: CategorieService) {}
@@ -49,7 +56,7 @@ export class ProduitList {
     this.produitService.saveProduit(this.nouveauProduit).subscribe({
       next: () => {
         this.chargerProduits();
-        this.nouveauProduit = { nom: '', description: '', prixUnitaire: 0, quantite: 0, seuilAlerte: 5, categorie: null };
+        this.nouveauProduit = { nom: '', description: '', prixUnitaire: 0, quantite: 0, seuilAlerte: 5, categorie: {id: null} };
       },
       error: (err) => console.error('Erreur ajout produit', err)
     });
