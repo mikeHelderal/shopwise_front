@@ -4,6 +4,7 @@ import {ClientService} from '../../services/client/client';
 import {StatutRendezVousService} from '../../services/statut-rendez-vous/statut-rendez-vous';
 import {FormsModule} from '@angular/forms';
 import {DatePipe, NgClass} from '@angular/common';
+import {ProduitService} from '../../services/produit/produit';
 interface ItemWithId {
   id: number;
   [key: string]: any;
@@ -23,16 +24,19 @@ export class Agenda implements OnInit {
   rendezVous = signal<any[]>([]);
   clients = signal<any[]>([]);
   statut = signal<any[]>([]);
+  produits = signal<any[]>([]);
 
   nouveauRdv : any = {
     dateHeure: '',
     client: null,
-    statut: null
+    statut: null,
+    produit: null
   };
 
   constructor(private rdvService: RendezVousService,
                private clientService : ClientService,
-               private statutService: StatutRendezVousService){}
+               private statutService: StatutRendezVousService,
+              private produitService: ProduitService){}
 
 
   ngOnInit(): void {
@@ -48,22 +52,24 @@ export class Agenda implements OnInit {
     this.statutService.getStatus().subscribe(data => {
       this.statut.set(data);
       if(data.length > 0){
-        this.nouveauRdv = data[0];
+        this.nouveauRdv.statut = data[0];
       }
-    });
+    })
+    this.produitService.getProduits().subscribe((data : any) => this.produits.set(data));
   }
 
   ajouterRdv() : void{
     console.log("AJOUTER RDV => ", this.nouveauRdv);
     const rdvAEnvoyer = {
       dateHeure: this.nouveauRdv.dateHeure,
-      client: { id: this.nouveauRdv.client?.id }, // On n'envoie que l'ID
-      statut: { id: this.nouveauRdv.statut.id }  // On n'envoie que l'ID
+      client: { id: this.nouveauRdv.client?.id },
+      statut: { id: this.nouveauRdv.statut.id } ,
+      produit: {id: this.nouveauRdv.produit.id}
     };
     this.rdvService.saveRendezVous(rdvAEnvoyer).subscribe({
       next: data => {
         this.chargerDonnees();
-        this.nouveauRdv= {dateHeure: '', client : null , statut: this.statut()[0]}
+        this.nouveauRdv= {dateHeure: '', client : null , statut: this.statut()[0], produit : null}
       }
     });
   }

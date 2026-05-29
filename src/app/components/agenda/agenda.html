@@ -11,6 +11,7 @@
     <tr>
       <th>Date & Heure</th>
       <th>Client</th>
+      <th>Service/produit</th>
       <th>Statut</th>
       <th class="text-center">Action</th>
     </tr>
@@ -20,6 +21,7 @@
         <tr>
           <td>{{ r.dateHeure | date:'dd/MM/yyyy HH:mm' }}</td>
           <td><strong>{{ r.client?.nom }}</strong></td>
+          <td><span class="test-muted">{{r.produit?.nom || 'Non spécifié'}}</span></td>
           <td>
             <span class="badge" [ngClass]="r.statut?.code === 'CONFIRME' ? 'bg-success' : 'bg-warning text-dark'">
               {{ r.statut?.libelle }}
@@ -56,6 +58,16 @@
                 <option [ngValue]="null" disabled>Choisir un client...</option>
                 @for (c of clients(); track c.id) {
                   <option [ngValue]="c">{{ c.nom }}</option>
+                }
+              </select>
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label">Service / Prestation</label>
+              <select class="form-select" [(ngModel)]="nouveauRdv.produit" name="produit" required>
+                <option [ngValue]="null" disabled>Choisir un service...</option>
+                @for (p of produits(); track p.id) {
+                  <option [ngValue]="p">{{ p.nom }} ({{ p.prixUnitaire }} €)</option>
                 }
               </select>
             </div>
