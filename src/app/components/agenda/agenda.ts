@@ -1,10 +1,11 @@
-import {Component, OnInit, signal} from '@angular/core';
+import {Component, computed, OnInit, signal} from '@angular/core';
 import {RendezVousService} from '../../services/rendez-vous/rendez-vous';
 import {ClientService} from '../../services/client/client';
 import {StatutRendezVousService} from '../../services/statut-rendez-vous/statut-rendez-vous';
 import {FormsModule} from '@angular/forms';
 import {DatePipe, NgClass} from '@angular/common';
 import {ProduitService} from '../../services/produit/produit';
+import {Navbar} from '../navbar/navbar';
 interface ItemWithId {
   id: number;
   [key: string]: any;
@@ -21,10 +22,23 @@ interface ItemWithId {
   styleUrl: './agenda.css',
 })
 export class Agenda implements OnInit {
+  protected readonly Navbar = Navbar;
+
   rendezVous = signal<any[]>([]);
   clients = signal<any[]>([]);
   statut = signal<any[]>([]);
   produits = signal<any[]>([]);
+
+  clientConnecte = signal<any>(null);
+  emailSaisi: string = '';
+
+  rendezVousFiltres = computed(() => {
+    if (this.currentRole === 'COMMERCANT') {
+      return this.rendezVous();
+    }
+    const client = this.clientConnecte();
+    return client ? this.rendezVous().filter(r => r.client?.id === client.id) : [];
+  });
 
   nouveauRdv : any = {
     dateHeure: '',
@@ -39,6 +53,9 @@ export class Agenda implements OnInit {
               private produitService: ProduitService){}
 
 
+  get currentRole() {
+    return Navbar.currentRole();
+  }
   ngOnInit(): void {
     this.chargerDonnees();
   }
@@ -94,5 +111,23 @@ export class Agenda implements OnInit {
     }
   }
 
+  identifierClient(): void {
+    if (!this.emailSaisi.trim()) return;
+
+    this.clientService.getClientByEmail(this.emailSaisi.trim()).subscribe({
+      next: (clientRecupere) => {
+        this.clientConnecte.set(clientRecupere);
+      },
+      error: (err) => {
+        console.error(err);
+        alert("Aucun client n'est enregistré avec cette adresse email.");
+      }
+    });
+  }
+
+  deconnecterClient(): void {
+    this.clientConnecte.set(null);
+    this.emailSaisi = '';
+  }
 
 }

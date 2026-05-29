@@ -1,33 +1,56 @@
 <nav class="navbar navbar-expand-lg navbar-dark bg-dark shadow-sm">
   <div class="container">
-    <a class="navbar-brand d-flex align-items-center" href="/dashboard">
+    <a class="navbar-brand d-flex align-items-center" [routerLink]="role === 'COMMERCANT' ? '/dashboard' : '/agenda'">
       <i class="bi bi-shop me-2 text-info"></i> <strong>ShopWise</strong>
     </a>
+
+    <div class="btn-group ms-3" role="group" aria-label="Sélection du rôle">
+      <button type="button"
+              class="btn btn-sm"
+              [class.btn-info]="role === 'COMMERCANT'"
+              [class.btn-outline-light]="role !== 'COMMERCANT'"
+              (click)="changerRole('COMMERCANT')">
+        <i class="bi bi-person-workspace"></i> Commerçant
+      </button>
+      <button type="button"
+              class="btn btn-sm"
+              [class.btn-info]="role === 'CLIENT'"
+              [class.btn-outline-light]="role !== 'CLIENT'"
+              (click)="changerRole('CLIENT')">
+        <i class="bi bi-person-circle"></i> Client
+      </button>
+    </div>
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
       <span class="navbar-toggler-icon"></span>
     </button>
+
     <div class="collapse navbar-collapse" id="navbarNav">
       <ul class="navbar-nav ms-auto">
-        <li class="nav-item">
-          <a class="nav-link" routerLink="/dashboard" routerLinkActive="active">
-            <i class="bi bi-speedometer2"></i> Dashboard
-          </a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link" routerLink="/clients" routerLinkActive="active">
-            <i class="bi bi-people"></i> Clients
-          </a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link" routerLink="/produits" routerLinkActive="active">
-            <i class="bi bi-box-seam"></i> Stocks
-          </a>
-        </li>
+
+        @if (role === 'COMMERCANT') {
+          <li class="nav-item">
+            <a class="nav-link" routerLink="/dashboard" routerLinkActive="active">
+              <i class="bi bi-speedometer2"></i> Dashboard
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" routerLink="/clients" routerLinkActive="active">
+              <i class="bi bi-people"></i> Clients
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" routerLink="/produits" routerLinkActive="active">
+              <i class="bi bi-box-seam"></i> Stocks
+            </a>
+          </li>
+        }
+
         <li class="nav-item">
           <a class="nav-link" routerLink="/agenda" routerLinkActive="active">
             <i class="bi bi-calendar-event"></i> Agenda
           </a>
         </li>
+
       </ul>
     </div>
   </div>

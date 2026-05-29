@@ -17,4 +17,10 @@ export class ClientService {
   saveClient(client: any): Observable<any> {
     return this.http.post<any>(this.apiUrl, client);
   }
+
+  getClientByEmail(email: string): Observable<any> {
+    return this.http.get<any>(`${this.apiUrl}/search`, {
+      params: { email: email }
+    });
+  }
 }

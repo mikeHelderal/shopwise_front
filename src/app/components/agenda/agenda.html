@@ -1,98 +1,175 @@
 <div class="container mt-4">
-  <div class="d-flex justify-content-between align-items-center mb-4">
-    <h2><i class="bi bi-calendar-check"></i> Agenda</h2>
-    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalRDV">
-      <i class="bi bi-plus-lg"></i> Nouveau Rendez-vous
-    </button>
-  </div>
 
-  <table class="table table-hover shadow-sm">
-    <thead class="table-dark">
-    <tr>
-      <th>Date & Heure</th>
-      <th>Client</th>
-      <th>Service/produit</th>
-      <th>Statut</th>
-      <th class="text-center">Action</th>
-    </tr>
-    </thead>
-    <tbody>
-      @for (r of rendezVous(); track r.id) {
-        <tr>
-          <td>{{ r.dateHeure | date:'dd/MM/yyyy HH:mm' }}</td>
-          <td><strong>{{ r.client?.nom }}</strong></td>
-          <td><span class="test-muted">{{r.produit?.nom || 'Non spécifié'}}</span></td>
-          <td>
-            <span class="badge" [ngClass]="r.statut?.code === 'CONFIRME' ? 'bg-success' : 'bg-warning text-dark'">
-              {{ r.statut?.libelle }}
-            </span>
-          </td>
-          <td class="text-center">
-            @if (r.statut?.code !== 'HONORE') {
-              <button class="btn btn-sm btn-success me-2" (click)="validerRdv(r.id)">
-                <i class="bi bi-check-circle"></i> Honoré
-              </button>
-            }
-            <button class="btn btn-sm btn-outline-danger" (click)="annulerRdv(r.id)">
-              <i class="bi bi-trash"></i>Annuler
+  @if (currentRole === 'CLIENT' && clientConnecte() === null) {
+    <div class="row justify-content-center my-5">
+      <div class="col-md-6">
+        <div class="card shadow border-0">
+          <div class="card-header bg-info text-white text-center py-3">
+            <h4 class="mb-0"><i class="bi bi-person-circle"></i> Espace Fidélité Client</h4>
+          </div>
+          <div class="card-body p-4 text-center">
+            <p class="text-muted">Saisissez votre adresse email pour accéder à votre espace, consulter vos points et voir vos rendez-vous.</p>
+
+            <div class="mb-3 text-start">
+              <label class="form-label fw-bold">Votre adresse email</label>
+              <input type="email"
+                     class="form-control"
+                     [(ngModel)]="emailSaisi"
+                     placeholder="exemple@domaine.com"
+                     (keyup.enter)="identifierClient()">
+            </div>
+
+            <button class="btn btn-info w-100 text-white fw-bold shadow-sm" (click)="identifierClient()">
+              <i class="bi bi-box-arrow-in-right"></i> Accéder à mon espace
             </button>
-          </td>
-        </tr>
-      }
-    </tbody>
-  </table>
-
-  <div class="modal fade" id="modalRDV" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog">
-      <div class="modal-content">
-        <div class="modal-header bg-primary text-white">
-          <h5 class="modal-title">Programmer un RDV</h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-        </div>
-        <div class="modal-body">
-          <form (ngSubmit)="ajouterRdv()" #rdvForm="ngForm">
-
-            <div class="mb-3">
-              <label class="form-label">Client</label>
-              <select class="form-select" [(ngModel)]="nouveauRdv.client" name="client" required>
-                <option [ngValue]="null" disabled>Choisir un client...</option>
-                @for (c of clients(); track c.id) {
-                  <option [ngValue]="c">{{ c.nom }}</option>
-                }
-              </select>
-            </div>
-
-            <div class="mb-3">
-              <label class="form-label">Service / Prestation</label>
-              <select class="form-select" [(ngModel)]="nouveauRdv.produit" name="produit" required>
-                <option [ngValue]="null" disabled>Choisir un service...</option>
-                @for (p of produits(); track p.id) {
-                  <option [ngValue]="p">{{ p.nom }} ({{ p.prixUnitaire }} €)</option>
-                }
-              </select>
-            </div>
-
-            <div class="mb-3">
-              <label class="form-label">Date et Heure</label>
-              <input type="datetime-local" class="form-control" [(ngModel)]="nouveauRdv.dateHeure" name="date" required>
-            </div>
-
-            <div class="mb-3">
-              <label class="form-label">Statut initial</label>
-              <select class="form-select" [(ngModel)]="nouveauRdv.statut" name="statut" required>
-                @for (s of statut(); track s.id) {
-                  <option [ngValue]="s">{{ s.libelle }}</option>
-                }
-              </select>
-            </div>
-
-            <div class="modal-footer px-0 pb-0">
-              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
-              <button type="submit" class="btn btn-primary" [disabled]="!rdvForm.form.valid" data-bs-dismiss="modal">Enregistrer</button>
-            </div>
-          </form>
+          </div>
         </div>
       </div>
     </div>
-  </div>
+  } @else {
+
+    <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
+      @if (currentRole === 'COMMERCANT') {
+        <h2><i class="bi bi-calendar-check"></i> Agenda</h2>
+        <button class="btn btn-primary shadow-sm" data-bs-toggle="modal" data-bs-target="#modalRDV">
+          <i class="bi bi-plus-lg"></i> Nouveau Rendez-vous
+        </button>
+      } @else {
+        <div>
+          <h2><i class="bi bi-emoji-smile text-info"></i> Bonjour, <strong>{{ clientConnecte()?.nom }}</strong></h2>
+          <p class="text-muted mb-0">Ravi de vous revoir dans votre espace fidélité.</p>
+        </div>
+
+        <div class="d-flex align-items-center gap-3">
+          <div class="bg-info text-white px-4 py-2 rounded shadow-sm text-center">
+            <span class="d-block small text-uppercase fw-bold" style="font-size: 0.7rem; letter-spacing: 0.5px;">Mon Solde Fidélité</span>
+            <strong class="fs-4"><i class="bi bi-star-fill text-warning me-1"></i> {{ clientConnecte()?.pointsFidelite || 0 }} pts</strong>
+          </div>
+          <button class="btn btn-outline-danger btn-sm shadow-sm" (click)="deconnecterClient()">
+            <i class="bi bi-box-arrow-left"></i> Quitter
+          </button>
+        </div>
+      }
+    </div>
+
+    @if (currentRole === 'CLIENT') {
+      <h4 class="mb-3 mt-4 text-secondary"><i class="bi bi-clock-history"></i> L'historique de mes rendez-vous</h4>
+    }
+
+    @if (rendezVousFiltres().length === 0) {
+      <div class="alert alert-light text-center py-5 shadow-sm border">
+        <i class="bi bi-calendar-x text-muted fs-1 d-block mb-2"></i>
+        <p class="mb-0 text-muted fw-semibold">Aucun rendez-vous enregistré pour le moment.</p>
+      </div>
+    } @else {
+      <table class="table table-hover shadow-sm align-middle">
+        <thead class="table-dark">
+        <tr>
+          <th>Date & Heure</th>
+          @if (currentRole === 'COMMERCANT') {
+            <th>Client</th>
+          }
+          <th>Service/produit</th>
+          <th>Statut</th>
+          <th class="text-center">Action</th>
+        </tr>
+        </thead>
+        <tbody>
+          @for (r of rendezVousFiltres(); track r.id) {
+            <tr>
+              <td>{{ r.dateHeure | date:'dd/MM/yyyy HH:mm' }}</td>
+
+              @if (currentRole === 'COMMERCANT') {
+                <td><strong>{{ r.client?.nom }}</strong></td>
+              }
+
+              <td><span class="text-muted">{{ r.produit?.nom || 'Non spécifié' }}</span></td>
+              <td>
+                <span class="badge"
+                      [ngClass]="r.statut?.code === 'CONFIRME' ? 'bg-success' : r.statut?.code === 'HONORE' ? 'bg-info' : 'bg-warning text-dark'">
+                  {{ r.statut?.libelle }}
+                </span>
+              </td>
+              <td class="text-center">
+                @if (currentRole === 'COMMERCANT') {
+                  @if (r.statut?.code !== 'HONORE') {
+                    <button class="btn btn-sm btn-success me-2 shadow-sm" (click)="validerRdv(r.id)">
+                      <i class="bi bi-check-circle"></i> Honoré
+                    </button>
+                  }
+                  <button class="btn btn-sm btn-outline-danger" (click)="annulerRdv(r.id)">
+                    <i class="bi bi-trash"></i> Annuler
+                  </button>
+                } @else {
+                  @if (r.statut?.code !== 'HONORE') {
+                    <button class="btn btn-sm btn-outline-danger shadow-sm" (click)="annulerRdv(r.id)">
+                      <i class="bi bi-x-circle"></i> Annuler mon RDV
+                    </button>
+                  } @else {
+                    <span class="text-success small fw-semibold"><i class="bi bi-patch-check-fill"></i> Points ajoutés</span>
+                  }
+                }
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    }
+
+    @if (currentRole === 'COMMERCANT') {
+      <div class="modal fade" id="modalRDV" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+          <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+              <h5 class="modal-title">Programmer un RDV</h5>
+              <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+              <form (ngSubmit)="ajouterRdv()" #rdvForm="ngForm">
+
+                <div class="mb-3">
+                  <label class="form-label">Client</label>
+                  <select class="form-select" [(ngModel)]="nouveauRdv.client" name="client" required>
+                    <option [ngValue]="null" disabled>Choisir un client...</option>
+                    @for (c of clients(); track c.id) {
+                      <option [ngValue]="c">{{ c.nom }}</option>
+                    }
+                  </select>
+                </div>
+
+                <div class="mb-3">
+                  <label class="form-label">Service / Prestation</label>
+                  <select class="form-select" [(ngModel)]="nouveauRdv.produit" name="produit" required>
+                    <option [ngValue]="null" disabled>Choisir un service...</option>
+                    @for (p of produits(); track p.id) {
+                      <option [ngValue]="p">{{ p.nom }} ({{ p.prixUnitaire }} €)</option>
+                    }
+                  </select>
+                </div>
+
+                <div class="mb-3">
+                  <label class="form-label">Date et Heure</label>
+                  <input type="datetime-local" class="form-control" [(ngModel)]="nouveauRdv.dateHeure" name="date" required>
+                </div>
+
+                <div class="mb-3">
+                  <label class="form-label">Statut initial</label>
+                  <select class="form-select" [(ngModel)]="nouveauRdv.statut" name="statut" required>
+                    @for (s of statut(); track s.id) {
+                      <option [ngValue]="s">{{ s.libelle }}</option>
+                    }
+                  </select>
+                </div>
+
+                <div class="modal-footer px-0 pb-0">
+                  <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                  <button type="submit" class="btn btn-primary" [disabled]="!rdvForm.form.valid" data-bs-dismiss="modal">Enregistrer</button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+    }
+  }
 </div>
