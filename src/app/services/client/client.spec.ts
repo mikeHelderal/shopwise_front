@@ -1,6 +1,8 @@
 import { TestBed } from '@angular/core/testing';
+import { ClientService } from './client';
+import { provideHttpClient } from '@angular/common/http';
 import { provideHttpClientTesting, HttpTestingController } from '@angular/common/http/testing';
-import { ClientService } from './client'; // Ajuste le chemin si besoin
+import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 
 describe('ClientService', () => {
   let service: ClientService;
@@ -10,46 +12,67 @@ describe('ClientService', () => {
     TestBed.configureTestingModule({
       providers: [
         ClientService,
+
+        provideHttpClient(),
         provideHttpClientTesting()
       ]
     });
+
     service = TestBed.inject(ClientService);
     httpMock = TestBed.inject(HttpTestingController);
   });
 
-  it('devrait récupérer la liste des clients (GET)', () => {
-    const mockClients = [
-      { id: 1, nom: 'Alice', email: 'alice@test.com' },
-      { id: 2, nom: 'Bob', email: 'bob@test.com' }
+  afterEach(() => {
+    httpMock.verify();
+  });
+
+  it('devrait être créé', () => {
+    expect(service).toBeTruthy();
+  });
+
+  it('devrait envoyer une requête GET et retourner la liste des clients', () => {
+    const clientsSimules = [
+      { id: 1, nom: 'Jean Dupont', email: 'jean@test.com', telephone: '0601020304' }
     ];
 
-    service.getClients().subscribe(clients => {
-      expect(clients.length).toBe(2);
-      expect(clients).toEqual(mockClients);
+    service.getClients().subscribe((data) => {
+      expect(data.length).toBe(1);
+      expect(data).toEqual(clientsSimules);
     });
 
     const req = httpMock.expectOne('http://localhost:8081/api/clients');
     expect(req.request.method).toBe('GET');
-    req.flush(mockClients);
+    req.flush(clientsSimules);
   });
 
-  it('devrait enregistrer un nouveau client (POST)', () => {
-    const nouveauClient = { nom: 'Charlie', email: 'charlie@test.com' };
-    const clientGenere = { id: 3, ...nouveauClient };
+  it('devrait envoyer une requête POST pour enregistrer un nouveau client', () => {
+    const nouveauClient = { nom: 'Lucie Martin', email: 'lucie@test.com', telephone: '0701020304' };
+    const reponseServeur = { id: 2, ...nouveauClient };
 
-    service.saveClient(nouveauClient).subscribe(client => {
-      expect(client.id).toBe(3);
-      expect(client.nom).toBe('Charlie');
+    service.saveClient(nouveauClient).subscribe((data) => {
+      expect(data).toEqual(reponseServeur);
     });
 
     const req = httpMock.expectOne('http://localhost:8081/api/clients');
     expect(req.request.method).toBe('POST');
-    expect(req.request.body).toEqual(nouveauClient); // On vérifie que le corps envoyé est correct
-
-    req.flush(clientGenere);
+    expect(req.request.body).toEqual(nouveauClient);
+    req.flush(reponseServeur);
   });
 
-  afterEach(() => {
-    httpMock.verify();
+
+  it('devrait envoyer une requête GET avec le paramètre email lors de la recherche', () => {
+    const emailCible = 'jean@test.com';
+    const clientTrouve = { id: 1, nom: 'Jean Dupont', email: emailCible };
+
+    service.getClientByEmail(emailCible).subscribe((data) => {
+      expect(data).toEqual(clientTrouve);
+    });
+
+    const req = httpMock.expectOne((request) => request.url === 'http://localhost:8081/api/clients/search');
+
+    expect(req.request.method).toBe('GET');
+    expect(req.request.params.get('email')).toBe(emailCible);
+
+    req.flush(clientTrouve);
   });
 });
