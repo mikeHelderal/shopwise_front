@@ -1,6 +1,9 @@
 import { TestBed } from '@angular/core/testing';
+import { ProduitService } from './produit';
+import { provideHttpClient } from '@angular/common/http';
 import { provideHttpClientTesting, HttpTestingController } from '@angular/common/http/testing';
-import { ProduitService } from './produit'; // Vérifie le chemin du fichier
+
+import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 
 describe('ProduitService', () => {
   let service: ProduitService;
@@ -10,46 +13,53 @@ describe('ProduitService', () => {
     TestBed.configureTestingModule({
       providers: [
         ProduitService,
+        provideHttpClient(),
         provideHttpClientTesting()
       ]
     });
+
     service = TestBed.inject(ProduitService);
     httpMock = TestBed.inject(HttpTestingController);
   });
 
-  it('devrait récupérer la liste des produits (GET)', () => {
-    const mockProduits = [
-      { id: 1, nom: 'Cire coiffante', quantite: 10 },
-      { id: 2, nom: 'Shampoing Bio', quantite: 5 }
+  afterEach(() => {
+    httpMock.verify();
+  });
+
+  it('devrait être créé', () => {
+    expect(service).toBeTruthy();
+  });
+
+
+  it('devrait envoyer une requête GET et retourner la liste des produits', () => {
+    const produitsSimules = [
+      { id: 1, nom: 'Shampooing Purifiant', prixUnitaire: 14.99, quantite: 10 },
+      { id: 2, nom: 'Huile de Barbe', prixUnitaire: 22.50, quantite: 5 }
     ];
 
-    service.getProduits().subscribe(produits => {
-      expect(produits.length).toBe(2);
-      expect(produits).toEqual(mockProduits);
+    service.getProduits().subscribe((data) => {
+      expect(data.length).toBe(2);
+      expect(data).toEqual(produitsSimules);
     });
 
     const req = httpMock.expectOne('http://localhost:8081/api/produits');
     expect(req.request.method).toBe('GET');
-    req.flush(mockProduits);
+
+    req.flush(produitsSimules);
   });
 
-  it('devrait enregistrer un nouveau produit (POST)', () => {
-    const nouveauProduit = { nom: 'Laque', prixUnitaire: 12.5, quantite: 20 };
-    const produitSauvegarde = { id: 10, ...nouveauProduit };
+  it('devrait envoyer une requête POST pour enregistrer un nouveau produit', () => {
+    const nouveauProduit = { nom: 'Gel Coiffant', prixUnitaire: 9.99, quantite: 15 };
+    const reponseServeur = { id: 3, ...nouveauProduit };
 
-    service.saveProduit(nouveauProduit).subscribe(res => {
-      expect(res.id).toBe(10);
-      expect(res.nom).toBe('Laque');
+    service.saveProduit(nouveauProduit).subscribe((data) => {
+      expect(data).toEqual(reponseServeur);
     });
 
     const req = httpMock.expectOne('http://localhost:8081/api/produits');
     expect(req.request.method).toBe('POST');
     expect(req.request.body).toEqual(nouveauProduit);
 
-    req.flush(produitSauvegarde);
-  });
-
-  afterEach(() => {
-    httpMock.verify(); // Vérification finale des requêtes
+    req.flush(reponseServeur);
   });
 });

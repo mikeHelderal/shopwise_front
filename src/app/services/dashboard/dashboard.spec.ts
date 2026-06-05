@@ -1,44 +1,49 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { DashboardService } from '../../services/dashboard/dashboard';
-import { of } from 'rxjs';
-import { vi, describe, it, expect, beforeEach } from 'vitest';
-import {Dashboard} from '../../components/dashboard/dashboard/dashboard';
+import { TestBed } from '@angular/core/testing';
+import { DashboardService } from './dashboard';
+import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClientTesting, HttpTestingController } from '@angular/common/http/testing';
+import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 
-describe('Dashboard (Component)', () => {
-  let component: Dashboard;
-  let fixture: ComponentFixture<Dashboard>;
+describe('DashboardService', () => {
+  let service: DashboardService;
+  let httpMock: HttpTestingController;
 
-  const mockDashboardService = {
-    getStats: vi.fn()
-  };
-
-  beforeEach(async () => {
-    mockDashboardService.getStats.mockReturnValue(of({
-      totalClients: 15,
-      rdvDuJour: 8,
-      produitsEnAlerte: 3
-    }));
-
-    await TestBed.configureTestingModule({
-      imports: [Dashboard],
+  beforeEach(() => {
+    TestBed.configureTestingModule({
       providers: [
-        { provide: DashboardService, useValue: mockDashboardService }
+        DashboardService,
+        provideHttpClient(),
+        provideHttpClientTesting()
       ]
-    }).compileComponents();
+    });
 
-    fixture = TestBed.createComponent(Dashboard);
-    component = fixture.componentInstance;
+    service = TestBed.inject(DashboardService);
+    httpMock = TestBed.inject(HttpTestingController);
+  });
+
+  afterEach(() => {
+    httpMock.verify();
   });
 
   it('devrait être créé', () => {
-    fixture.detectChanges();
-    expect(component).toBeTruthy();
+    expect(service).toBeTruthy();
   });
 
-  it('devrait charger les statistiques via le mock', () => {
-    fixture.detectChanges();
+  it('devrait envoyer une requête GET et renvoyer les statistiques du tableau de bord', () => {
+    const statsSimulees = {
+      totalClients: 120,
+      totalProduits: 45,
+      rendezVousAujourdHui: 12
+    };
 
-    expect(mockDashboardService.getStats).toHaveBeenCalled();
-    expect(component.stats()?.totalClients).toBe(15);
+    service.getStats().subscribe((data) => {
+      expect(data).toEqual(statsSimulees);
+      expect(data.totalClients).toBe(120);
+    });
+
+    const req = httpMock.expectOne('http://127.0.0.1:8081/api/dashboard/stats');
+    expect(req.request.method).toBe('GET');
+
+    req.flush(statsSimulees);
   });
 });
